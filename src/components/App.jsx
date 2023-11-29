@@ -7,37 +7,35 @@ import { GlobalStyle } from './GlobalStyle';
 import { Container } from './MainPageStyle.styled';
 import { Notify } from 'notiflix/build/notiflix-notify-aio';
 import { NoPhoneMessage } from './NoPhoneMessage/NoPhoneMessage';
+import { useDispatch, useSelector } from 'react-redux';
+import { changeContacts } from 'redux/store';
 
 const storageContacts = 'contacts';
 
-const savedContacts = window.localStorage.getItem(storageContacts);
-
 export const App = () => {
-  const [contacts, setContacts] = useState(JSON.parse(savedContacts) || []);
-  const [filters, setFilters] = useState('');
+  const dispatch = useDispatch();
+
+  const reduxContacts = useSelector(state => state.contacts);
+  const reduxFilter = useSelector(state => state.filter);
 
   useEffect(() => {
-    window.localStorage.setItem(storageContacts, JSON.stringify(contacts));
-  }, [contacts]);
-
-  const updateTopic = newTopic => {
-    setFilters(newTopic);
-  };
+    window.localStorage.setItem(storageContacts, JSON.stringify(reduxContacts));
+  }, [reduxContacts]);
 
   const filterContacts = () => {
-    return contacts.filter(contact => {
+    return reduxContacts.filter(contact => {
       const contactName = contact.name.toLowerCase();
       const contactNumber = contact.number;
 
       return (
-        contactName.includes(filters.toLowerCase()) ||
-        contactNumber.includes(filters)
+        contactName.includes(reduxFilter.toLowerCase()) ||
+        contactNumber.includes(reduxFilter)
       );
     });
   };
 
   const addPhone = newPhone => {
-    if (contacts.some(contact => contact.name === newPhone.name)) {
+    if (reduxContacts.some(contact => contact.name === newPhone.name)) {
       Notify.failure(`${newPhone.name} already in phonebook`);
       return;
     }
@@ -46,7 +44,8 @@ export const App = () => {
       ...newPhone,
       id: nanoid(),
     };
-    setContacts(prevContacts => [...prevContacts, phone]);
+
+    dispatch(changeContacts([...reduxContacts, phone]));
 
     Notify.success(`${newPhone.name} added to your contacts`);
   };
@@ -54,9 +53,7 @@ export const App = () => {
   const deletePhone = user => {
     Notify.info(`${user.name} removed from your phone book`);
 
-    setContacts(prevContacts =>
-      prevContacts.filter(item => item.id !== user.id)
-    );
+    dispatch(changeContacts(reduxContacts.filter(item => item.id !== user.id)));
   };
 
   const filteredUsers = filterContacts();
@@ -66,8 +63,8 @@ export const App = () => {
       <h1>Phonebook</h1>
       <PhoneForm onAdd={addPhone} />
       <h2>Contacts</h2>
-      <Filter filter={filters} onSearchPhone={updateTopic} />
-      {contacts.length > 0 ? (
+      <Filter />
+      {reduxContacts.length > 0 ? (
         <ContactList items={filteredUsers} onDelete={deletePhone} />
       ) : (
         <NoPhoneMessage />
