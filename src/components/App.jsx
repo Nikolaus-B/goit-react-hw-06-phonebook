@@ -5,10 +5,12 @@ import { GlobalStyle } from './GlobalStyle';
 import { Container } from './MainPageStyle.styled';
 import { NoPhoneMessage } from './NoPhoneMessage/NoPhoneMessage';
 import { useSelector } from 'react-redux';
+import { getContacts } from 'redux/contactsSlice';
+import { getFilter } from 'redux/filterSlice';
 
 export const App = () => {
-  const contacts = useSelector(state => state.contacts.contacts);
-  const filter = useSelector(state => state.filter.filter);
+  const contacts = useSelector(getContacts);
+  const filter = useSelector(getFilter);
 
   const filterContacts = () => {
     return contacts.filter(contact => {
