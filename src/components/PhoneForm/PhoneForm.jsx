@@ -8,6 +8,8 @@ import {
   ErrorMessage,
 } from './PhoneForm.styled';
 import * as Yup from 'yup';
+import { useDispatch } from 'react-redux';
+import { addContact } from 'redux/contactsSlice';
 
 const PhonebookSchema = Yup.object().shape({
   name: Yup.string()
@@ -20,7 +22,8 @@ const PhonebookSchema = Yup.object().shape({
     .required('Required'),
 });
 
-export const PhoneForm = ({ onAdd }) => {
+export const PhoneForm = () => {
+  const dispatch = useDispatch();
   return (
     <FormContainer>
       <Formik
@@ -31,7 +34,7 @@ export const PhoneForm = ({ onAdd }) => {
         validationSchema={PhonebookSchema}
         onSubmit={(values, actions) => {
           actions.resetForm();
-          onAdd(values);
+          dispatch(addContact(values));
         }}
       >
         <Form>
